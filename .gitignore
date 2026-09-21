@@ -1,0 +1,6 @@
+app
+app.exe
+actual.txt
+*.o
+*.obj
+.DS_Store

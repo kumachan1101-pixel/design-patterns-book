@@ -1,0 +1,28 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 全フォルダをビルドし、本の実行結果と照合する（make）
+        run: |
+          set -e
+          fail=0
+          for d in $(find . -name Makefile -printf '%h\n' | sort); do
+            echo "==== $d"
+            make -C "$d" -s verify || fail=1
+          done
+          exit $fail
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: run.bat と同じスクリプトで照合する
+        shell: cmd
+        run: volume01\run.bat verify
