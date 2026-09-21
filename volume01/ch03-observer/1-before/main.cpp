@@ -174,14 +174,21 @@ void InventoryManager::notifyAll(const std::string& productId,
         "商品 " + productId + "（" + info.name + "）"
         + " の在庫が閾値以下です。";
 
+    int sent   = 0;
+    int failed = 0;
+
     // メールは件名と本文に分け、真偽値で成否を見る
     if (!email.sendMail("在庫アラート", message)) {
         std::cout << "[通知受付失敗] Email" << std::endl;
+        failed++;
+    } else {
+        sent++;
     }
 
     // ダッシュボードは文言を受け取らず、成否も返さない。
     // 送れたかどうかを確かめる手段がない
     dashboard.refreshStockWidget(productId, info.stock);
+    sent++;
 
     // チャットは投稿先が要り、空の投稿IDが失敗を表す
     std::string postId = chat.postMessage("inventory-alert",
@@ -189,7 +196,13 @@ void InventoryManager::notifyAll(const std::string& productId,
 
     if (postId.empty()) {
         std::cout << "[通知受付失敗] Chat" << std::endl;
+        failed++;
+    } else {
+        sent++;
     }
+
+    std::cout << "[通知結果] 成功:" << sent
+         << " 失敗:" << failed << std::endl;
 }
 
 int main() {

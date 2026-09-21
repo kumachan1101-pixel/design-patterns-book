@@ -180,7 +180,7 @@ void InventoryManager::replenishStock(std::string productId,
 
 void InventoryManager::notifyAll(const std::string& productId,
                                  const ProductInfo& info) {
-    // ← 追加。4手段の結果を数える
+    // 現状と同じ結果集計を、4手段に対して行う
     int sent   = 0;  // 送れた件数
     int failed = 0;  // 送れなかった件数
 
@@ -189,24 +189,24 @@ void InventoryManager::notifyAll(const std::string& productId,
         + " の在庫が閾値以下です。";
 
     if (!email.sendMail("在庫アラート", message)) {
-        std::cout << "[通知失敗] Email" << std::endl;
-        failed++;                       // ← 追加
+        std::cout << "[通知受付失敗] Email" << std::endl;
+        failed++;
     } else {
-        sent++;                         // ← 追加
+        sent++;
     }
 
     // ダッシュボードは成否を返さないので、成功として数えるしかない
     dashboard.refreshStockWidget(productId, info.stock);
-    sent++;                             // ← 追加
+    sent++;
 
     std::string postId = chat.postMessage("inventory-alert",
                                      message);
 
     if (postId.empty()) {
-        std::cout << "[通知失敗] Chat" << std::endl;
-        failed++;                       // ← 追加
+        std::cout << "[通知受付失敗] Chat" << std::endl;
+        failed++;
     } else {
-        sent++;                         // ← 追加
+        sent++;
     }
 
     // ← ここから追加。SMSだけは本文の作り方が違う
@@ -215,7 +215,7 @@ void InventoryManager::notifyAll(const std::string& productId,
         + std::to_string(info.stock);
 
     if (!sms.sendSMS(smsText)) {
-        std::cout << "[通知失敗] SMS" << std::endl;
+        std::cout << "[通知受付失敗] SMS" << std::endl;
         failed++;
     } else {
         sent++;
@@ -223,7 +223,6 @@ void InventoryManager::notifyAll(const std::string& productId,
 
     std::cout << "[通知結果] 成功:" << sent
          << " 失敗:" << failed << std::endl;
-    // ← ここまで
 }
 
 int main() {
