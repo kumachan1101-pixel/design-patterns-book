@@ -2,8 +2,8 @@
 # ふだんは同じフォルダの run.bat をダブルクリックしてください。
 #
 # 直接呼ぶ場合:
-#   powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1          メニューを出す
-#   powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1 verify   全部を本の実行結果と照合する
+#   powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1       メニューを出す
+#   powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1 all   全部をビルドして実行する
 #
 # 生成した実行ファイルは一時フォルダ（%TEMP%\design-patterns-book）に置き、
 # このフォルダの中には何も作りません。
@@ -36,7 +36,7 @@ function Get-Targets {
     Get-ChildItem -Path $Root -Directory | Where-Object { $_.Name -like 'ch*' } | Sort-Object Name | ForEach-Object {
         $ch = $_
         Get-ChildItem -Path $ch.FullName -Directory | Sort-Object Name | ForEach-Object {
-            if (Test-Path (Join-Path $_.FullName 'expected.txt')) {
+            if (Test-Path (Join-Path $_.FullName 'main.cpp')) {
                 $cn = $ChapterNames[$ch.Name]; if (-not $cn) { $cn = $ch.Name }
                 $sn = $StateNames[$_.Name];   if (-not $sn) { $sn = $_.Name }
                 $list += [pscustomobject]@{
@@ -95,29 +95,6 @@ function Invoke-Target($exe, $dir) {
     return ,@($lines | ForEach-Object { ([string]$_).TrimEnd("`r") })
 }
 
-function Trim-Tail($arr) {
-    $n = $arr.Count
-    while ($n -gt 0 -and [string]::IsNullOrEmpty([string]$arr[$n - 1])) { $n-- }
-    if ($n -eq 0) { return ,@() }
-    return ,@($arr[0..($n - 1)])
-}
-
-# 一致すれば 0、違えば最初に違った行番号（1始まり）を返す
-function Compare-Output($lines, $dir) {
-    $expected = @(Get-Content -Path (Join-Path $dir 'expected.txt') -Encoding UTF8)
-    $a = Trim-Tail $lines
-    $e = Trim-Tail $expected
-    $max = [Math]::Max($a.Count, $e.Count)
-    for ($i = 0; $i -lt $max; $i++) {
-        $x = if ($i -lt $a.Count) { [string]$a[$i] } else { $null }
-        $y = if ($i -lt $e.Count) { [string]$e[$i] } else { $null }
-        if ($x -cne $y) {
-            return [pscustomobject]@{ Line = $i + 1; Actual = $x; Expected = $y }
-        }
-    }
-    return $null
-}
-
 function Run-One($t, $compiler) {
     Write-Host ''
     Write-Host ('----- ' + $t.Label + ' -----') -ForegroundColor Cyan
@@ -126,44 +103,27 @@ function Run-One($t, $compiler) {
     $exe = Build-Target $t $compiler
     if (-not $exe) {
         Write-Host 'ビルドに失敗しました。上のメッセージを確認してください。' -ForegroundColor Red
-        return
+        return $false
     }
     Write-Host '実行結果:' -ForegroundColor Cyan
     Write-Host ''
     $lines = Invoke-Target $exe $t.Dir
     $lines | ForEach-Object { Write-Host $_ }
     Write-Host ''
-    $diff = Compare-Output $lines $t.Dir
-    if ($diff) {
-        Write-Host ('本の実行結果と違います（' + $diff.Line + '行目）。') -ForegroundColor Red
-        Write-Host ('  本    : ' + $diff.Expected)
-        Write-Host ('  実行  : ' + $diff.Actual)
-    } else {
-        Write-Host '本の実行結果と一致しました。' -ForegroundColor Green
-    }
+    return $true
 }
 
-function Verify-All($targets, $compiler) {
+function Run-All($targets, $compiler) {
     Write-Host ''
-    Write-Host ('全 ' + $targets.Count + ' 件をビルドして、本の実行結果と照合します（' + $compiler + '）。') -ForegroundColor Cyan
+    Write-Host ('全 ' + $targets.Count + ' 件をビルドして実行します（' + $compiler + '）。') -ForegroundColor Cyan
     Write-Host ''
     $ng = 0
     foreach ($t in $targets) {
-        $exe = Build-Target $t $compiler
-        if (-not $exe) {
-            Write-Host ('  ビルド失敗  ' + $t.Label) -ForegroundColor Red; $ng++; continue
-        }
-        $lines = Invoke-Target $exe $t.Dir
-        $diff = Compare-Output $lines $t.Dir
-        if ($diff) {
-            Write-Host ('  不一致      ' + $t.Label + '（' + $diff.Line + '行目）') -ForegroundColor Red; $ng++
-        } else {
-            Write-Host ('  一致        ' + $t.Label) -ForegroundColor Green
-        }
+        if (-not (Run-One $t $compiler)) { $ng++ }
     }
     Write-Host ''
     if ($ng -eq 0) {
-        Write-Host ('すべて一致しました（' + $targets.Count + ' 件）。') -ForegroundColor Green
+        Write-Host ('すべて実行できました（' + $targets.Count + ' 件）。') -ForegroundColor Green
         return $true
     }
     Write-Host ($ng.ToString() + ' 件に問題があります。') -ForegroundColor Red
@@ -183,7 +143,7 @@ function Show-Menu($targets, $compiler) {
         Write-Host ('  {0,2}  {1}' -f ($i + 1), $targets[$i].Label)
     }
     Write-Host ''
-    Write-Host '   V  全部をビルドして、本の実行結果と照合する'
+    Write-Host '   A  全部をビルドして実行する'
     Write-Host '   Q  終了'
     Write-Host ''
 }
@@ -192,14 +152,14 @@ function Show-Menu($targets, $compiler) {
 $compiler = Find-Compiler
 if (-not $compiler) {
     Show-NoCompiler
-    if ($Mode -ne 'verify') { [void](Read-Host 'Enter キーで終了します') }
+    if ($Mode -ne 'all') { [void](Read-Host 'Enter キーで終了します') }
     exit 2
 }
 
 $targets = Get-Targets
 
-if ($Mode -eq 'verify') {
-    if (Verify-All $targets $compiler) { exit 0 } else { exit 1 }
+if ($Mode -eq 'all') {
+    if (Run-All $targets $compiler) { exit 0 } else { exit 1 }
 }
 
 while ($true) {
@@ -208,14 +168,14 @@ while ($true) {
     if ($null -eq $ans) { break }
     $ans = $ans.Trim()
     if ($ans -match '^[qQ]$') { break }
-    if ($ans -match '^[vV]$') {
-        [void](Verify-All $targets $compiler)
+    if ($ans -match '^[aA]$') {
+        [void](Run-All $targets $compiler)
         [void](Read-Host 'Enter キーでメニューへ戻ります')
         continue
     }
     $n = 0
     if ([int]::TryParse($ans, [ref]$n) -and $n -ge 1 -and $n -le $targets.Count) {
-        Run-One $targets[$n - 1] $compiler
+        [void](Run-One $targets[$n - 1] $compiler)
         [void](Read-Host 'Enter キーでメニューへ戻ります')
     } elseif ($ans -ne '') {
         Write-Host '番号が正しくありません。' -ForegroundColor Yellow

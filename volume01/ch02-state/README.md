@@ -18,7 +18,6 @@ macOS・Linux では次のとおりです。
 ```sh
 cd 1-before
 make run      # 実行
-make verify   # 本に載っている実行結果と一致するか検査
 ```
 
 ## 変更前と変更後を見比べる

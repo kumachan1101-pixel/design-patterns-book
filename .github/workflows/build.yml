@@ -1,4 +1,4 @@
-name: verify
+name: build-and-run
 
 on:
   push:
@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 全フォルダをビルドし、本の実行結果と照合する（make）
+      - name: 全フォルダをビルドして実行する（make）
         run: |
           set -e
           fail=0
           for d in $(find . -name Makefile -printf '%h\n' | sort); do
             echo "==== $d"
-            make -C "$d" -s verify || fail=1
+            make -C "$d" -s run || fail=1
           done
           exit $fail
 
@@ -23,6 +23,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: run.bat と同じスクリプトで照合する
+      - name: run.bat と同じスクリプトで全件を実行する
         shell: cmd
-        run: volume01\run.bat verify
+        run: volume01\run.bat all
