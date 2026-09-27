@@ -8,6 +8,10 @@ void AvailableState::reserve(TicketReservation* reservation) {
             return;
         }
 
+        std::cout << "予約対象："
+
+                  << reservation->eventTitle() << "\n";
+
         reservation->reserveSeat();
         std::cout << "予約完了しました\n";
         reservation->setState(reservedState());

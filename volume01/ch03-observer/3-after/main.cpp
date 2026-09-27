@@ -32,7 +32,7 @@ public:
     }
 
     void save(const std::string& id, const ProductInfo& info) {
-        records[id] = info;           // 実行中の商品マスターへ追加
+        records[id] = info;           // 実行中の商品マスタへ追加
     }
 
     bool isBelowThreshold(const std::string& id,
@@ -213,7 +213,7 @@ public:
         std::cout << "商品 " << productId
              << "（" << info.name << "）"
              << " の在庫を " << quantity << " 減らしました。"
-             << " 在庫: " << before
+             << "在庫: " << before
              << " -> " << info.stock << std::endl;
 
         if (db.isBelowThreshold(productId, info.stock)) {
@@ -246,8 +246,7 @@ public:
              << "（" << info.name << "）\n"
              << "  在庫を " << quantity
              << " 補充しました。在庫: " << before
-             << " -> " << info.stock
-             << "（通知なし）" << std::endl;
+             << " -> " << info.stock << std::endl;
     }
 
 private:

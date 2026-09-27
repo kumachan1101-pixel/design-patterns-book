@@ -12,21 +12,13 @@ public:
     explicit PaymentCalculator(const IDiscountRule& r)
             : rule(r) {}
 
-    PaymentResult calculate(const Order& order) const {
-        int subtotal = 0;
-
-        for (const auto& item : order.items) subtotal +=
-            item.price;
+    PaymentResult calculate(int subtotal) const {
         return PaymentResult{subtotal, rule.apply(subtotal)};
     }
 };
 
 class CheckoutResultRenderer {
 public:
-    void showError(const std::string& message) {
-        std::cout << "エラー: " << message << "\n";
-    }
-
     void showOrderResult(const CustomerInfo& customer,
                          const Order& order,
                          const CampaignContext& context,
@@ -62,13 +54,12 @@ public:
     void process(const Order& order,
                  const CampaignContext& context) {
         if (!db.exists(order.customerId)) {
-            renderer.showError(
-                "顧客ID " + order.customerId
-                + " は登録されていません");
+            std::cout << "エラー: 顧客ID " << order.customerId
+                << " は登録されていません\n";
             return;
         }
         if (order.items.empty()) {
-            renderer.showError("注文が空です");
+            std::cout << "エラー: 注文が空です\n";
             return;
         }
 
@@ -78,8 +69,12 @@ public:
             selector.select(customer.memberType, context);
         PaymentCalculator calculator(rule);
 
+        int subtotal = 0;
+        for (const auto& item : order.items) {
+            subtotal += item.price;
+        }
         const PaymentResult payment =
-            calculator.calculate(order);
+            calculator.calculate(subtotal);
         renderer.showOrderResult(customer, order,
                                  context, payment);
     }

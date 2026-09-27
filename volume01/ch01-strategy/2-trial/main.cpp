@@ -17,6 +17,11 @@ public:
     std::vector<Item> items;  // カートに入っている商品の一覧
 };
 
+struct PaymentResult {
+    int subtotal;    // 割引前の小計
+    int finalPrice;  // 割引後の支払金額
+};
+
 // CampaignContext クラスへの変更（サマーセールフラグの追加が必要）
 class CampaignContext {
 public:
@@ -50,34 +55,28 @@ public:
 
 class PaymentCalculator {
 public:
-    int calculate(const Order& order,
-                  const std::string& memberType,
-                  const CampaignContext& context) {
-        // (1) 小計：商品の単価を全部足す
-        int total = 0;
+    PaymentResult calculate(int subtotal,
+                            const std::string& memberType,
+                            const CampaignContext& context) {
+        int finalPrice = subtotal;
 
-        for (const auto& item : order.items) {
-            total += item.price;
-        }
-
-        // (2) 割引：会員種別とキャンペーンで割引率を決める
-        // サマーセール対応：Regular会員向けに条件を追加
         if (memberType == "Premium") {
-            total = total * 80 / 100;  // 20%引き（サマーセール対象外）
+            finalPrice = subtotal * 80 / 100; // 20%引き（サマーセール対象外）
         // ← ここから追加。サマーセール単独と、
         //    キャンペーンとの重なりを別の枝にする
-        } else if (context.isSummerSale && context.isCampaignActive) {
-            total = (total * 90 / 100) * 95 / 100; // 逐次割引（Regular会員）
+        } else if (context.isSummerSale &&
+                   context.isCampaignActive) {
+            finalPrice = (subtotal * 90 / 100) * 95 / 100;
         } else if (context.isSummerSale) {
-            total = total * 95 / 100;  // 5%引き（Regular会員）
+            finalPrice = subtotal * 95 / 100;
         // ← ここまで
         } else if (context.isCampaignActive) {  // ← 変更
-            total = total * 90 / 100;  // 10%引き
+            finalPrice = subtotal * 90 / 100;
         }
 
         // どれにも当てはまらなければ割引なし（定価）
 
-        return total;
+        return PaymentResult{subtotal, finalPrice};
     }
 };
 
@@ -86,8 +85,7 @@ public:
     void showOrderResult(const CustomerInfo& customer,
                          const Order& order,
                          const CampaignContext& context,
-                         int subtotal,
-                         int finalPrice) {
+                         const PaymentResult& payment) {
         std::cout << customer.name << " さんの注文:";
 
         for (const auto& item : order.items) {
@@ -98,8 +96,9 @@ public:
         std::cout << "\n  条件: 会員=" << customer.memberType
                   << ", キャンペーン="
                   << (context.isCampaignActive ? "あり" : "なし");
-        std::cout << "\n  小計 " << subtotal << "円 → 支払金額 "
-                  << finalPrice << "円\n";
+        std::cout << "\n  小計 " << payment.subtotal
+                  << "円 → 支払金額 "
+                  << payment.finalPrice << "円\n";
     }
 };
 
@@ -132,22 +131,20 @@ void OrderProcessor::process(const Order& order,
         return;
     }
 
-    // 会員種別をIDから取得して計算へ渡す
+    // 会員種別をIDから取得する
     CustomerInfo customer = db.get(order.customerId);
 
-    int finalPrice =
-        calculator.calculate(order,
-                             customer.memberType, context);
-
-    // 表示形式はRenderer境界へ委ねる
     int subtotal = 0;
 
     for (const auto& item : order.items) {
         subtotal += item.price;
     }
 
-    renderer.showOrderResult(customer, order, context,
-                             subtotal, finalPrice);
+    const PaymentResult payment =
+        calculator.calculate(subtotal,
+                             customer.memberType, context);
+
+    renderer.showOrderResult(customer, order, context, payment);
 }
 
 // 変更後のクラスを使った動作確認

@@ -17,19 +17,23 @@ struct EventInfo {
 
 class EventDatabase {
 private:
+    // イベントIDをキーに、イベント情報を保持する
     std::map<std::string, EventInfo> records;
 public:
     EventDatabase() {
+        // []で、キーに対応する値を登録する
         records["EVT001"] = {"春の音楽祭",  100,  20};
         records["EVT002"] = {"夏のフェス",  500, 499};
         records["EVT003"] = {"秋の映画会",   50,  50};  // 満席
     }
 
     bool exists(const std::string& id) const {
+        // countは、キーがあれば1、なければ0を返す
         return records.count(id) > 0;
     }
 
     EventInfo get(const std::string& id) const {
+        // atで、登録済みキーに対応する値を取得する
         return records.at(id);
     }
 
@@ -40,6 +44,7 @@ public:
     }
 
     void reserveSeat(const std::string& id) {
+        // 値そのものを参照し、map内の予約数を書き換える
         auto& event = records.at(id);
         int before = event.reserved;
         ++event.reserved;
