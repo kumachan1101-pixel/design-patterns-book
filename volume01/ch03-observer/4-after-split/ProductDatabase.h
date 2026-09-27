@@ -35,7 +35,7 @@ public:
     }
 
     void save(const std::string& id, const ProductInfo& info) {
-        records[id] = info;           // 実行中の商品マスタへ追加
+        records[id] = info;           // 実行中の商品マスターへ追加
     }
 
     bool isBelowThreshold(const std::string& id,

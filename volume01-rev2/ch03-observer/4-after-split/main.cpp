@@ -1,0 +1,40 @@
+#include "InventoryApplication.h"
+
+
+int main() {
+    // mainは具体的な通知先や登録順を知らない
+    InventoryApplication app;
+
+    // PRD001: 在庫50、閾値10 → 5減らしても閾値超えのまま
+    std::cout << "--- ケース1: 在庫が閾値を超えたまま減少"
+                 "（通知なし） ---" << std::endl;
+    app.inventory().reduceStock("PRD001", 5);
+    std::cout << std::endl;
+
+    // PRD002: 在庫3、閾値5 → 最初から閾値以下。4手段へ通知
+    std::cout << "--- ケース2: 在庫が閾値以下に減少（4手段へ通知） ---"
+              << std::endl;
+    app.inventory().reduceStock("PRD002", 1);
+    std::cout << std::endl;
+
+    std::cout << "--- ケース3: 在庫が補充された（閾値超え） ---"
+              << std::endl;
+    app.inventory().replenishStock("PRD001", 20);
+    std::cout << std::endl;
+
+    // PRD003: 在庫0 → 出庫エラー
+    std::cout << "--- ケース4: 在庫0の出庫操作 ---" << std::endl;
+    app.inventory().reduceStock("PRD003", 1);
+    std::cout << std::endl;
+
+    // ケース5: 存在しない商品IDのエラー確認
+    std::cout << "--- ケース5: 存在しない商品IDを操作する ---"
+              << std::endl;
+    app.inventory().reduceStock("PRD999", 1);
+    std::cout << std::endl;
+
+    std::cout << "--- ケース6: 0個の補充を拒否する ---" << std::endl;
+    app.inventory().replenishStock("PRD001", 0);
+
+    return 0;
+}

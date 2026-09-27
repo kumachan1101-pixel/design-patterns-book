@@ -7,17 +7,24 @@ Kindle本 **『デザインパターン C++ソフトウェア設計』** に載�
 - 著者: KumaKuma H.H.
 - ライセンス: [MIT](LICENSE)
 
-## 収録
+## どのフォルダを使うか
 
-| フォルダ | 本での位置 |
+本を改訂してコードが変わったときは、フォルダを分けて追加しています。 **お手元の本の「おわりに」にある「掲載コードについて」で、書かれているフォルダ名を確かめてください。**
+
+| 本の「掲載コードについて」の書き方 | 使うフォルダ |
 |---|---|
-| [`volume01/`](volume01/) | 『デザインパターン C++ソフトウェア設計』（Strategy / State / Observer） |
+| `volume01-rev2` フォルダの `run.bat` と書かれている（改訂後の本文） | [`volume01-rev2/`](volume01-rev2/) |
+| `volume01` フォルダの `run.bat` と書かれている（最初に公開した本文） | [`volume01/`](volume01/) |
+
+どちらも『デザインパターン C++ソフトウェア設計』（Strategy / State / Observer）の掲載コードです。Kindleで本を最新の内容に更新した場合は、`volume01-rev2/` を使ってください。以前の版のフォルダは、その版の本文と一致したまま残しています。
+
+以下の説明では、改訂後の `volume01-rev2/` を例にします。`volume01/` でも手順は同じです。
 
 ## 動かす
 
 ### Windows：`run.bat` をダブルクリック
 
-[`volume01/run.bat`](volume01/run.bat) をダブルクリックすると、次のようなメニューが出ます。番号を入れて Enter を押すと、その場でビルドして実行します。
+[`volume01-rev2/run.bat`](volume01-rev2/run.bat) をダブルクリックすると、次のようなメニューが出ます。番号を入れて Enter を押すと、その場でビルドして実行します。
 
 ```text
 =====================================================================
@@ -40,7 +47,7 @@ C++14 が通るコンパイラ（`g++` または `clang++`）と `make` があ�
 
 ```sh
 git clone https://github.com/kumachan1101-pixel/design-patterns-book.git
-cd design-patterns-book/volume01/ch01-strategy/1-before
+cd design-patterns-book/volume01-rev2/ch01-strategy/1-before
 make run
 ```
 
@@ -72,7 +79,7 @@ g++ -std=c++14 -Wall main.cpp -o app
 
 ### Visual Studio の `cl` を使う場合
 
-`cl` はふつう `Path` に入っていないため、`run.bat` のダブルクリックでは見つかりません。スタートメニューから **「Developer PowerShell for VS」** を開き、`volume01` フォルダへ移動して次を実行します。
+`cl` はふつう `Path` に入っていないため、`run.bat` のダブルクリックでは見つかりません。スタートメニューから **「Developer PowerShell for VS」** を開き、使うフォルダ（`volume01-rev2` など）へ移動して次を実行します。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File run.ps1
@@ -98,7 +105,7 @@ ZIP でダウンロードして展開した場合、`run.bat` をダブルクリ
 
 - **学習用です。** 本文に書いたとおり、永続化・外部通信・例外処理・並行処理は入れていません。設計の構造を短く見せることを優先しています。そのまま本番環境へ持ち込む想定ではありません。
 - **本文が正本です。** 掲載コードと同じ内容になるよう検査していますが、食い違いを見つけたら [Issues](https://github.com/kumachan1101-pixel/design-patterns-book/issues) で知らせてください。正誤表としても使います。
-- **`main` が最新の本文に対応します。** 正誤表で本文を直したときは、コードも同じ内容へそろえ、変更内容をコミット履歴に残します。
+- **版ごとにフォルダを分けます。** 本文の改訂でコードが変わるときは新しいフォルダを追加し、以前の版のフォルダは変えません。同じ版の中の誤りを直すときは、そのフォルダを直し、変更内容をコミット履歴に残します。
 
 ## 免責
 

@@ -17,11 +17,6 @@ public:
     std::vector<Item> items;  // カートに入っている商品の一覧
 };
 
-struct PaymentResult {
-    int subtotal;    // 割引前の小計
-    int finalPrice;  // 割引後の支払金額
-};
-
 class CampaignContext {
 public:
     bool isCampaignActive = false;  // キャンペーン期間中なら true
@@ -53,22 +48,27 @@ public:
 
 class PaymentCalculator {
 public:
-    PaymentResult calculate(int subtotal,
-                            const std::string& memberType,
-                            const CampaignContext& context) {
-        int finalPrice = subtotal;
+    int calculate(const Order& order,
+                  const std::string& memberType,
+                  const CampaignContext& context) {
+        // (1) 小計：商品の単価を全部足す
+        int total = 0;
 
-        // 会員種別とキャンペーンで割引率を決める
+        for (const auto& item : order.items) {
+            total += item.price;
+        }
+
+        // (2) 割引：会員種別とキャンペーンで割引率を決める
         if (memberType == "Premium") {
-            finalPrice = subtotal * 80 / 100; // プレミアム割引 20%引き
+            total = total * 80 / 100;   // プレミアム割引 20%引き
         } else if (memberType == "Regular" &&
                    context.isCampaignActive) {
-            finalPrice = subtotal * 90 / 100; // キャンペーン割引 10%引き
+            total = total * 90 / 100;   // キャンペーン割引 10%引き
         }
 
         // どちらにも当てはまらなければ割引なし（定価）
 
-        return PaymentResult{subtotal, finalPrice};
+        return total;
     }
 };
 
@@ -77,7 +77,8 @@ public:
     void showOrderResult(const CustomerInfo& customer,
                          const Order& order,
                          const CampaignContext& context,
-                         const PaymentResult& payment) {
+                         int subtotal,
+                         int finalPrice) {
         std::cout << customer.name << " さんの注文:";
 
         for (const auto& item : order.items) {
@@ -88,9 +89,8 @@ public:
         std::cout << "\n  条件: 会員=" << customer.memberType
                   << ", キャンペーン="
                   << (context.isCampaignActive ? "あり" : "なし");
-        std::cout << "\n  小計 " << payment.subtotal
-                  << "円 → 支払金額 "
-                  << payment.finalPrice << "円\n";
+        std::cout << "\n  小計 " << subtotal << "円 → 支払金額 "
+                  << finalPrice << "円\n";
     }
 };
 
@@ -123,22 +123,22 @@ void OrderProcessor::process(const Order& order,
         return;
     }
 
-    // 会員種別をIDから取得する
+    // 会員種別をIDから取得して計算へ渡す
     CustomerInfo customer = db.get(order.customerId);
 
-    // 商品単価を合算し、注文全体ではなく小計を支払計算へ渡す
+    int finalPrice =
+        calculator.calculate(order,
+                             customer.memberType, context);
+
+    // 表示形式はRenderer境界へ委ねる
     int subtotal = 0;
 
     for (const auto& item : order.items) {
         subtotal += item.price;
     }
 
-    const PaymentResult payment =
-        calculator.calculate(subtotal,
-                             customer.memberType, context);
-
-    // 表示形式はRenderer境界へ委ねる
-    renderer.showOrderResult(customer, order, context, payment);
+    renderer.showOrderResult(customer, order, context,
+                             subtotal, finalPrice);
 }
 
 int main() {

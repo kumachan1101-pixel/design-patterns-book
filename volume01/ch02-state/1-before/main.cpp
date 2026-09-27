@@ -10,12 +10,10 @@ struct EventInfo {
 
 class EventDatabase {
 private:
-    // イベントIDをキーに、イベント情報を保持する
     std::map<std::string, EventInfo> records;
 public:
     // この章で使うイベント台帳を初期化する
     EventDatabase() {
-        // []で、キーに対応する値を登録する
         records["EVT001"] = {"春の音楽祭",  100,  20};
         records["EVT002"] = {"夏のフェス",  500, 499};
         records["EVT003"] = {"秋の映画会",   50,  50};  // 満席
@@ -23,13 +21,11 @@ public:
 
     // 指定したイベントIDが台帳にあるかを返す
     bool exists(const std::string& id) const {
-        // countは、キーがあれば1、なければ0を返す
         return records.count(id) > 0;
     }
 
     // 指定したイベントの現在値を返す
     EventInfo get(const std::string& id) const {
-        // atで、登録済みキーに対応する値を取得する
         return records.at(id);
     }
 
@@ -42,7 +38,6 @@ public:
 
     // 予約成立時に予約数を1増やす
     void reserveSeat(const std::string& id) {
-        // 値そのものを参照し、map内の予約数を書き換える
         auto& event = records.at(id);
         int before = event.reserved;
 
@@ -78,7 +73,7 @@ enum class ReservationStatus {
 class TicketReservation {
 private:
     // --- データ ---
-    EventDatabase& db;   // 共有の在庫データ（外部から受け取る）
+    EventDatabase& db;   // 共有の在庫データ（外部から注入）
     std::string eventId; // 予約対象のイベント
     ReservationStatus status; // 現在の予約状態
 

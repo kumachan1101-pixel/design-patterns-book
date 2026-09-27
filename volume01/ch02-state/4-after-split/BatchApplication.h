@@ -16,6 +16,7 @@ public:
         TicketReservation& seat1 =
             assembly.startReservation("EVT001");
         if (seat1.showAvailability()) {
+            std::cout << "予約対象：" << seat1.eventTitle() << "\n";
             seat1.reserve();
             seat1.pay();
         }
@@ -37,6 +38,7 @@ public:
         TicketReservation& seat3 =
             assembly.startReservation("EVT002");
         if (seat3.showAvailability()) {
+            std::cout << "予約対象：" << seat3.eventTitle() << "\n";
             seat3.reserve();
             seat3.hold();
             seat3.pay();
@@ -100,6 +102,7 @@ public:
         std::cout << "--- ケース9: 存在しないイベントID ---\n";
         TicketReservation& missing =
             assembly.startReservation("EVT999");
+        missing.showAvailability();
         missing.reserve();
     }
 };

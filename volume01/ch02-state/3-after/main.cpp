@@ -11,23 +11,19 @@ struct EventInfo {
 
 class EventDatabase {
 private:
-    // イベントIDをキーに、イベント情報を保持する
     std::map<std::string, EventInfo> records;
 public:
     EventDatabase() {
-        // []で、キーに対応する値を登録する
         records["EVT001"] = {"春の音楽祭",  100,  20};
         records["EVT002"] = {"夏のフェス",  500, 499};
         records["EVT003"] = {"秋の映画会",   50,  50};  // 満席
     }
 
     bool exists(const std::string& id) const {
-        // countは、キーがあれば1、なければ0を返す
         return records.count(id) > 0;
     }
 
     EventInfo get(const std::string& id) const {
-        // atで、登録済みキーに対応する値を取得する
         return records.at(id);
     }
 
@@ -38,7 +34,6 @@ public:
     }
 
     void reserveSeat(const std::string& id) {
-        // 値そのものを参照し、map内の予約数を書き換える
         auto& event = records.at(id);
         int before = event.reserved;
         ++event.reserved;
@@ -171,10 +166,6 @@ public:
             return;
         }
 
-        std::cout << "予約対象："
-
-                  << reservation->eventTitle() << "\n";
-
         reservation->reserveSeat();
         std::cout << "予約完了しました\n";
         reservation->setState(reservedState());
@@ -259,15 +250,12 @@ IReservationState* heldState() {
 // ReservationAssembly：共有実体の生成・所有・受け渡しを担う
 class ReservationAssembly {
     EventDatabase db;
-    // 追加後も、先に返した予約への参照が無効にならない列
     std::list<TicketReservation> reservations;
 public:
     TicketReservation& startReservation(
             const std::string& eventId) {
-        // 予約をlistの末尾に直接生成する
         reservations.emplace_back(
             availableState(), &db, eventId);
-        // 直前に追加した末尾の予約を参照で返す。削除はしない
         return reservations.back();
     }
 };
@@ -284,6 +272,7 @@ public:
         TicketReservation& seat1 =
             assembly.startReservation("EVT001");
         if (seat1.showAvailability()) {
+            std::cout << "予約対象：" << seat1.eventTitle() << "\n";
             seat1.reserve();
             seat1.pay();
         }
@@ -305,6 +294,7 @@ public:
         TicketReservation& seat3 =
             assembly.startReservation("EVT002");
         if (seat3.showAvailability()) {
+            std::cout << "予約対象：" << seat3.eventTitle() << "\n";
             seat3.reserve();
             seat3.hold();
             seat3.pay();
@@ -368,6 +358,7 @@ public:
         std::cout << "--- ケース9: 存在しないイベントID ---\n";
         TicketReservation& missing =
             assembly.startReservation("EVT999");
+        missing.showAvailability();
         missing.reserve();
     }
 };
