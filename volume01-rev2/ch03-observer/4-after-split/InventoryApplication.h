@@ -33,4 +33,27 @@ public:
     InventoryManager& inventory() { return manager; }
 };
 
+class FailureContinuationExample {
+    ProductDatabase productDatabase;
+    EmailNotifier beforeFailure;
+    FailingNotificationStub failure;
+    SMSNotifier afterFailure;
+    InventoryManager manager;
+
+public:
+    FailureContinuationExample()
+        : manager(productDatabase) {
+        bool registered = manager.attach(&beforeFailure)
+                       && manager.attach(&failure)
+                       && manager.attach(&afterFailure);
+        if (!registered) {
+            throw std::logic_error("確認用通知先の登録に失敗しました");
+        }
+    }
+
+    void run() {
+        manager.reduceStock("PRD002", 1);
+    }
+};
+
 #endif  // INVENTORYAPPLICATION_H_INCLUDED

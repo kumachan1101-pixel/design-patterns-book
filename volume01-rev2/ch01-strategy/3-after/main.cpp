@@ -231,8 +231,11 @@ public:
         }
 
         std::cout << "\n  条件: 会員=" << customer.memberType
-                  << ", キャンペーン="
+                  << ", 通常キャンペーン="
           << (context.isActive(CampaignCode::RegularCampaign)
+                      ? "あり" : "なし")
+                  << ", サマーセール="
+          << (context.isActive(CampaignCode::SummerSale)
                       ? "あり" : "なし");
         std::cout << "\n  小計 " << payment.subtotal
                   << "円 → 支払金額 "

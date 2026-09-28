@@ -36,5 +36,11 @@ int main() {
     std::cout << "--- ケース6: 0個の補充を拒否する ---" << std::endl;
     app.inventory().replenishStock("PRD001", 0);
 
+    std::cout << std::endl;
+    std::cout << "--- ケース7: 1件失敗後も次の通知を継続 ---"
+              << std::endl;
+    FailureContinuationExample failureExample;
+    failureExample.run();
+
     return 0;
 }

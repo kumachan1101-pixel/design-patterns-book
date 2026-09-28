@@ -18,6 +18,10 @@ public:
         if (seat1.showAvailability()) {
             seat1.reserve();
             seat1.pay();
+            std::cout << "[状態確認] 状態="
+                      << seat1.currentStateName()
+                      << " 予約数="
+                      << seat1.reservedCount() << "\n";
         }
 
         // ケース2：通常キャンセル (Available → Reserved → Available)
@@ -40,6 +44,10 @@ public:
             seat3.reserve();
             seat3.hold();
             seat3.pay();
+            std::cout << "[状態確認] 状態="
+                      << seat3.currentStateName()
+                      << " 予約数="
+                      << seat3.reservedCount() << "\n";
         }
 
         // ケース4：通常の決済期限切れ (Reserved → Available)
@@ -91,10 +99,22 @@ public:
 
         TicketReservation& seat8 =
             assembly.startReservation("EVT001");
+        std::cout << "[不変確認] Availableでpay前 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.pay();      // Available では支払えない
+        std::cout << "[不変確認] Availableでpay後 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.reserve();
         seat8.pay();
+        std::cout << "[不変確認] Paidでcancel前 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.cancel();   // Paid からは取り消せない
+        std::cout << "[不変確認] Paidでcancel後 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
 
         // ケース9：存在しないイベントIDのエラー
         std::cout << "--- ケース9: 存在しないイベントID ---\n";

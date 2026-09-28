@@ -93,6 +93,9 @@ public:
         std::cout << "期限切れ処理は行えません\n";
     }
 
+    // 表示・検証専用。呼び出し側はこの名前で処理を分岐しない。
+    virtual const char* stateName() const = 0;
+
     virtual ~IReservationState() = default;
 };
 
@@ -146,6 +149,12 @@ public:
     std::string eventTitle() const {
         return db->get(eventId).title;
     }
+    const char* currentStateName() const {
+        return state->stateName();
+    }
+    int reservedCount() const {
+        return db->get(eventId).reserved;
+    }
 
     // 操作は現在の状態へ委譲する。
     // 未登録のイベントIDだけは、状態に関係なく先に断る。
@@ -164,6 +173,10 @@ IReservationState* heldState();
 // Available（予約可能）：空席があれば予約し、満席なら断る
 class AvailableState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Available";
+    }
+
     void reserve(TicketReservation* reservation) override {
         if (!reservation->hasCapacity()) {
             std::cout << "エラー：" << reservation->eventTitle()
@@ -184,6 +197,10 @@ public:
 // Reserved（予約済み）：支払い、取消、一時保留、期限切れを処理する
 class ReservedState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Reserved";
+    }
+
     void pay(TicketReservation* reservation) override {
         std::cout << "支払い完了しました\n";
         reservation->setState(paidState());
@@ -207,12 +224,21 @@ public:
     }
 };
 
-// Paid（支払い済み）：完了状態のため、すべて既定の拒否を使う
-class PaidState : public IReservationState {};
+// Paid（支払い済み）：操作はすべて既定の拒否を使う
+class PaidState : public IReservationState {
+public:
+    const char* stateName() const override {
+        return "Paid";
+    }
+};
 
 // Held（一時保留）：支払い、取消、期限切れを処理する
 class HeldState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Held";
+    }
+
     void pay(TicketReservation* reservation) override {
         std::cout << "保留から支払い完了しました\n";
         reservation->setState(paidState());
@@ -286,6 +312,10 @@ public:
         if (seat1.showAvailability()) {
             seat1.reserve();
             seat1.pay();
+            std::cout << "[状態確認] 状態="
+                      << seat1.currentStateName()
+                      << " 予約数="
+                      << seat1.reservedCount() << "\n";
         }
 
         // ケース2：通常キャンセル (Available → Reserved → Available)
@@ -308,6 +338,10 @@ public:
             seat3.reserve();
             seat3.hold();
             seat3.pay();
+            std::cout << "[状態確認] 状態="
+                      << seat3.currentStateName()
+                      << " 予約数="
+                      << seat3.reservedCount() << "\n";
         }
 
         // ケース4：通常の決済期限切れ (Reserved → Available)
@@ -359,10 +393,22 @@ public:
 
         TicketReservation& seat8 =
             assembly.startReservation("EVT001");
+        std::cout << "[不変確認] Availableでpay前 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.pay();      // Available では支払えない
+        std::cout << "[不変確認] Availableでpay後 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.reserve();
         seat8.pay();
+        std::cout << "[不変確認] Paidでcancel前 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
         seat8.cancel();   // Paid からは取り消せない
+        std::cout << "[不変確認] Paidでcancel後 状態="
+                  << seat8.currentStateName()
+                  << " 予約数=" << seat8.reservedCount() << "\n";
 
         // ケース9：存在しないイベントIDのエラー
         std::cout << "--- ケース9: 存在しないイベントID ---\n";

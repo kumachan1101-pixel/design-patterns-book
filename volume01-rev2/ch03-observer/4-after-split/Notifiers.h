@@ -94,4 +94,15 @@ public:
     }
 };
 
+// 受入確認専用：必ず失敗を返す通知先
+class FailingNotificationStub : public INotification {
+public:
+    DeliveryResult send(const StockAlert& a) override {
+        std::cout << "FailureStub: 在庫警告 " << a.productId
+                  << " 残" << a.stock << " -> 送信失敗"
+                  << std::endl;
+        return {false, "FailureStub"};
+    }
+};
+
 #endif  // NOTIFIERS_H_INCLUDED

@@ -94,8 +94,10 @@ public:
         }
 
         std::cout << "\n  条件: 会員=" << customer.memberType
-                  << ", キャンペーン="
-                  << (context.isCampaignActive ? "あり" : "なし");
+                  << ", 通常キャンペーン="
+                  << (context.isCampaignActive ? "あり" : "なし")
+                  << ", サマーセール="
+                  << (context.isSummerSale ? "あり" : "なし");
         std::cout << "\n  小計 " << payment.subtotal
                   << "円 → 支払金額 "
                   << payment.finalPrice << "円\n";

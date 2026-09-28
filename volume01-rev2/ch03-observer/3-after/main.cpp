@@ -164,6 +164,17 @@ public:
     }
 };
 
+// 受入確認専用：必ず失敗を返す通知先
+class FailingNotificationStub : public INotification {
+public:
+    DeliveryResult send(const StockAlert& a) override {
+        std::cout << "FailureStub: 在庫警告 " << a.productId
+                  << " 残" << a.stock << " -> 送信失敗"
+                  << std::endl;
+        return {false, "FailureStub"};
+    }
+};
+
 // 通知元クラス（Subject に相当）
 class InventoryManager {
 private:
@@ -301,6 +312,29 @@ public:
     InventoryManager& inventory() { return manager; }
 };
 
+class FailureContinuationExample {
+    ProductDatabase productDatabase;
+    EmailNotifier beforeFailure;
+    FailingNotificationStub failure;
+    SMSNotifier afterFailure;
+    InventoryManager manager;
+
+public:
+    FailureContinuationExample()
+        : manager(productDatabase) {
+        bool registered = manager.attach(&beforeFailure)
+                       && manager.attach(&failure)
+                       && manager.attach(&afterFailure);
+        if (!registered) {
+            throw std::logic_error("確認用通知先の登録に失敗しました");
+        }
+    }
+
+    void run() {
+        manager.reduceStock("PRD002", 1);
+    }
+};
+
 int main() {
     // mainは具体的な通知先や登録順を知らない
     InventoryApplication app;
@@ -335,6 +369,12 @@ int main() {
 
     std::cout << "--- ケース6: 0個の補充を拒否する ---" << std::endl;
     app.inventory().replenishStock("PRD001", 0);
+
+    std::cout << std::endl;
+    std::cout << "--- ケース7: 1件失敗後も次の通知を継続 ---"
+              << std::endl;
+    FailureContinuationExample failureExample;
+    failureExample.run();
 
     return 0;
 }

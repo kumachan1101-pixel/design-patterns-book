@@ -29,6 +29,9 @@ public:
         std::cout << "期限切れ処理は行えません\n";
     }
 
+    // 表示・検証専用。呼び出し側はこの名前で処理を分岐しない。
+    virtual const char* stateName() const = 0;
+
     virtual ~IReservationState() = default;
 };
 

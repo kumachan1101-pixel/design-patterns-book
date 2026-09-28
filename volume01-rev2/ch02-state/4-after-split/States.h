@@ -6,11 +6,19 @@
 
 class AvailableState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Available";
+    }
+
     void reserve(TicketReservation* reservation) override;
 };
 
 class ReservedState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Reserved";
+    }
+
     void pay(TicketReservation* reservation) override;
 
     void cancel(TicketReservation* reservation) override;
@@ -20,12 +28,21 @@ public:
     void expire(TicketReservation* reservation) override;
 };
 
-class PaidState : public IReservationState {};
+class PaidState : public IReservationState {
+public:
+    const char* stateName() const override {
+        return "Paid";
+    }
+};
 
 // Held（一時保留）：支払い、取消、期限切れを処理する
 
 class HeldState : public IReservationState {
 public:
+    const char* stateName() const override {
+        return "Held";
+    }
+
     void pay(TicketReservation* reservation) override;
 
     void cancel(TicketReservation* reservation) override;

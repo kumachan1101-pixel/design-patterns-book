@@ -57,6 +57,12 @@ public:
     std::string eventTitle() const {
         return db->get(eventId).title;
     }
+    const char* currentStateName() const {
+        return state->stateName();
+    }
+    int reservedCount() const {
+        return db->get(eventId).reserved;
+    }
 
     // 操作は現在の状態へ委譲する。
     // 未登録のイベントIDだけは、状態に関係なく先に断る。
