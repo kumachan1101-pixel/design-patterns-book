@@ -121,6 +121,12 @@ public:
         TicketReservation& missing =
             assembly.startReservation("EVT999");
         missing.reserve();
+
+        // ケース10：未登録IDへ支払う（状態へ渡る前に断る）
+        std::cout << "--- ケース10: 未登録IDへ支払う ---\n";
+        TicketReservation& missingPay =
+            assembly.startReservation("EVT999");
+        missingPay.pay();
     }
 };
 

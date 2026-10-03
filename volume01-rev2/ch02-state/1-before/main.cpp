@@ -204,5 +204,10 @@ int main() {
     seat6.pay();      // Reserved  → Paid
     seat6.cancel();   // エラー（Paid状態）
 
+    // ケース7: 未登録IDへ状態依存の操作を試みる
+    std::cout << "\n--- ケース7: 未登録IDへ支払う ---\n";
+    TicketReservation seat7(db, "UNKNOWN");
+    seat7.pay();      // エラー（Available状態）
+
     return 0;
 }
