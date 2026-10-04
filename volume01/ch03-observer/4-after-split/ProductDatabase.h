@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <stdexcept>
 
+// 商品マスタの1件分
 struct ProductInfo {
     std::string name;            // 商品名
     int         stock;           // 在庫数
@@ -67,19 +68,5 @@ struct DeliveryResult {
     bool        sent;      // 送れたか
     std::string channel;   // どの通知手段か
 };
-
-// 通知先が満たす必要がある契約（インターフェース）
-
-// 通知先1：メール通知
-
-// 通知先2：ダッシュボード更新
-
-// 通知先3：チャット通知
-
-// 通知先4：SMS通知。既存3手段と同じく、その場で成否が決まる
-
-// 通知元クラス（Subject に相当）
-
-// 生成・所有・登録を一か所に閉じるアプリケーションの組み立て役
 
 #endif  // PRODUCTDATABASE_H_INCLUDED

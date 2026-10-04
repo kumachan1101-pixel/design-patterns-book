@@ -3,6 +3,9 @@
 
 #include "EventDatabase.h"
 
+class TicketReservation;
+
+// 状態ごとの共通操作と、許可されない操作の既定処理を持つ基底クラス
 class IReservationState {
 public:
     // 引数は操作対象の予約コンテキスト（TicketReservation*）。
@@ -31,12 +34,5 @@ public:
 
     virtual ~IReservationState() = default;
 };
-
-IReservationState* availableState();
-IReservationState* reservedState();
-IReservationState* paidState();
-IReservationState* heldState();
-
-// Available（予約可能）：空席があれば予約し、満席なら断る
 
 #endif  // IRESERVATIONSTATE_H_INCLUDED

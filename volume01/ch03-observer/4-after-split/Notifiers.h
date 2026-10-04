@@ -4,6 +4,7 @@
 #include "ProductDatabase.h"
 #include "INotification.h"
 
+// 通知先1：メール通知
 class EmailNotifier : public INotification {
     std::vector<std::string> inbox;
 
@@ -27,6 +28,7 @@ public:
     }
 };
 
+// 通知先2：ダッシュボード更新
 class DashboardUpdater : public INotification {
     int refreshCount;
 
@@ -47,6 +49,7 @@ public:
     }
 };
 
+// 通知先3：チャット通知
 class ChatNotifier : public INotification {
     std::vector<std::string> posted;
 
@@ -74,6 +77,7 @@ public:
     }
 };
 
+// 通知先4：SMS通知。既存3手段と同じく、その場で成否が決まる
 class SMSNotifier : public INotification {
     std::vector<std::string> inbox;
 

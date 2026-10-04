@@ -3,6 +3,7 @@
 
 #include "ProductDatabase.h"
 
+// 通知先が満たす必要がある契約（インターフェース）
 class INotification {
 public:
     virtual ~INotification() = default;

@@ -8,6 +8,7 @@
 #include <map>
 #include <stdexcept>
 
+// 会員種別（ルール判定で使う直文字列を名前へ置き換える）
 namespace MemberType {
     const std::string Premium = "Premium";  // 優待会員
     const std::string Regular = "Regular";  // 一般会員

@@ -4,6 +4,7 @@
 #include "Notifiers.h"
 #include "InventoryManager.h"
 
+// 生成・所有・登録を一か所に閉じるアプリケーションの組み立て役
 class InventoryApplication {
     // 上から生成され、下から破棄される。
     // InventoryManagerより通知先を先に宣言し、借用先の寿命を保証する。

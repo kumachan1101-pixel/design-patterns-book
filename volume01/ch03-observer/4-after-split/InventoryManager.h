@@ -4,6 +4,7 @@
 #include "ProductDatabase.h"
 #include "INotification.h"
 
+// 通知元クラス（Subject に相当）
 class InventoryManager {
 private:
     // 非所有ポインタ。登録中の通知先はInventoryManagerより長く生存すること。

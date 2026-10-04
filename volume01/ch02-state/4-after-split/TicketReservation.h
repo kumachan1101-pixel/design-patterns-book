@@ -4,10 +4,7 @@
 #include "EventDatabase.h"
 #include "IReservationState.h"
 
-class TicketReservation;
-
-// 状態ごとの共通操作と、許可されない操作の既定処理を持つ基底クラス
-
+// 予約クラス：状態を保持し操作を委譲する
 class TicketReservation {
 private:
     IReservationState* state;
